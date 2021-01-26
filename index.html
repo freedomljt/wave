@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wave</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <style>
+      body {
+        background: #ccc;
+      }
+      @keyframes wave {
+        from {
+          background-position: 400px 0, 400px 0;
+        }
+      }
+      .waveContent {
+        margin: 30% auto 0;
+        border-radius: 50%;
+        position: relative;
+        width: 100px;
+        height: 100px;
+        animation: wave 4s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="waveBg" width="200" height="100" v-show="showBg"></canvas>
+      <div class="waveContent"></div>
+    </div>
+    <script>
+      var app = new Vue({
+        el: "#app",
+        data() {
+          return {
+            showBg: true,
+            text: "test",
+          };
+        },
+        mounted() {
+          this.initWave();
+        },
+        methods: {
+          sin(A, w, T, C, x) {
+            return (
+              A * Math.sin(w * T * x) +
+              A * Math.sin(0.5 * w * T * x) +
+              A * Math.sin(0.25 * w * T * x) +
+              C
+            );
+          },
+          initWave() {
+            console.log("init wave");
+            const c = document.getElementById("waveBg");
+            const bg = document.getElementsByClassName("waveContent")[0];
+            const ct = c.getContext("2d");
+            let width = c.width;
+            let height = c.height;
+            let beginX = 0; // 图片起点横坐标
+            let A = 2; // 振幅 正负值决定方向 最好取值在[2,7]
+            let w = 0.147; // 频率,此处是canvas的宽度取两千分之一左右
+            let T = 2; // 决定相同的宽度下波的周期,取整数
+            let C = 50; // 图形距离画布的距离
+            let m = 7; // 缩放系数
+            ct.beginPath();
+            ct.moveTo(beginX, C);
+            for (let i = 0; i < width + 1; i++) {
+              ct.lineTo(beginX + m * i, this.sin(A + 1, w, T + 1, C, i));
+            }
+            ct.lineTo(width, height);
+            ct.lineTo(0, height);
+            ct.closePath();
+            ct.fillStyle = "rgba(21,71,215,.8)";
+            ct.fill();
+
+            ct.beginPath();
+            ct.moveTo(beginX, C);
+            for (let i = 0; i < width + 1; i++) {
+              ct.lineTo(beginX + m * i, this.sin(A, w, T, C, i));
+            }
+            ct.lineTo(width, height);
+            ct.lineTo(0, height);
+            ct.closePath();
+            ct.fillStyle = "rgba(21,171,215,.5)";
+            ct.fill();
+
+            bg.style.background = `url(${c.toDataURL()}) #fff`;
+            this.showBg = false;
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
